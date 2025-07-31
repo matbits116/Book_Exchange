@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background: #f5f7fa; margin: 0; }
+        .header { background: #4f8cff; color: #fff; padding: 2rem 0; text-align: center; }
+        .container { max-width: 800px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 2rem; }
+        .cta { background: #4f8cff; color: #fff; padding: 1rem 2rem; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
+        .cta:hover { background: #357ae8; }
+        .features { display: flex; gap: 2rem; margin-top: 2rem; justify-content: center; }
+        .feature { flex: 1; background: #f0f4fa; border-radius: 8px; padding: 1rem; text-align: center; }
+        @media (max-width: 600px) { .features { flex-direction: column; gap: 1rem; } }
+    </style>
+</head>
+<body>
+    <div class="header" style="position:relative;">
+        <h1>Book Exchange Platform</h1>
+        <p>List, browse, and exchange books with others!</p>
+        <div style="position:absolute; top:2rem; right:2rem;">
+            <a href="/login" class="cta" style="padding:0.5rem 1.2rem; font-size:1rem; margin-right:0.5rem;">Login</a>
+            <a href="/register" class="cta" style="padding:0.5rem 1.2rem; font-size:1rem; background:#fff; color:#357ae8; border:1px solid #357ae8;">Register</a>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Book of the Day -->
+        <section style="margin-bottom:2rem; text-align:center;">
+            <h2 style="color:#357ae8;">Book of the Day</h2>
+            <div style="display:inline-block; background:#eaf2ff; border-radius:10px; padding:1.5rem 2.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <img src="{{ book_of_the_day.cover_url }}" alt="Cover" style="width:90px; height:135px; object-fit:cover; border-radius:6px; margin-bottom:0.5rem;"/>
+                <div><strong style="font-size:1.3rem;">{{ book_of_the_day.title }}</strong></div>
+                <div><span style="color:#357ae8;">{{ book_of_the_day.author }}</span></div>
+                <div style="margin-top:0.5rem;">
+                    {% if book_of_the_day.rating_count > 0 %}
+                        {{ book_of_the_day.average_rating }}★ ({{ book_of_the_day.rating_count }})
+                    {% else %}
+                        No ratings yet
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Bar -->
+        <form action="/" method="post" style="display:flex; justify-content:center; gap:0.5rem; margin-bottom:2rem;">
+            <input type="text" name="search" value="{{ search_term }}" placeholder="Search by title or author..." style="width:300px; padding:0.7rem; border-radius:5px; border:1px solid #ccc; font-size:1rem;">
+            <button type="submit" class="cta">Search</button>
+            <a href="/" class="cta" style="background:#eee; color:#357ae8; border:1px solid #357ae8;">Clear</a>
+        </form>
+        <section style="margin-bottom:2rem;">
+            <h2 style="text-align:center; color:#357ae8;">Featured Books</h2>
+            <ul style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; list-style:none; padding:0;">
+                {% for book in books[:5] %}
+                <li style="background:#f0f4fa; border-radius:8px; padding:1rem 2rem; min-width:180px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+                    <img src="{{ book.cover_url }}" alt="Cover" style="width:70px; height:105px; object-fit:cover; border-radius:5px; margin-bottom:0.5rem;"/>
+                    <div><strong style="font-size:1.1rem;">{{ book.title }}</strong></div>
+                    <div><span style="color:#357ae8;">{{ book.author }}</span></div>
+                    <div style="margin:0.5rem 0;">
+                        {% if book.rating_count > 0 %}
+                            {{ book.average_rating }}★ ({{ book.rating_count }})
+                        {% else %}
+                            No ratings yet
+                        {% endif %}
+                    </div>
+                    <form action="/rate" method="post" style="margin-top:0.5rem;">
+                        <input type="hidden" name="title" value="{{ book.title }}" />
+                        <label>Rate: </label>
+                        <select name="stars" style="padding:0.2rem;">
+                            <option value="1">1★</option>
+                            <option value="2">2★</option>
+                            <option value="3">3★</option>
+                            <option value="4">4★</option>
+                            <option value="5">5★</option>
+                        </select>
+                        <button type="submit" class="cta" style="padding:0.2rem 0.7rem; font-size:0.95rem;">Submit</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <nav style="margin-bottom:2rem; text-align:center;">
+            <a href="/" class="cta" style="margin-right:1rem;">Home</a>
+            <a href="/browse" class="cta">Browse Books</a>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div style="background:#e0ffe0; color:#2d7a2d; padding:1rem; border-radius:5px; margin-bottom:1rem; text-align:center;">
+            {% for category, msg in messages %}
+                <span>{{ msg }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="features">
+            <div class="feature">
+                <h2>List Books</h2>
+                <p>Add your books to the exchange and find new readers.</p>
+                <form action="/list" method="post" style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; align-items:center;">
+                    <input type="text" name="title" placeholder="Book Title" required style="width:80%;padding:0.5rem;">
+                    <input type="text" name="author" placeholder="Author" required style="width:80%;padding:0.5rem;">
+                    <input type="url" name="coverUrl" placeholder="Cover Image URL (optional)" style="width:80%;padding:0.5rem;">
+                    <button type="submit" class="cta" style="width:80%;">List Book</button>
+                </form>
+            </div>
+            <div class="feature">
+                <h2>Browse</h2>
+                <p>Explore available books and discover your next read.</p>
+                <form action="/browse" method="get" style="margin-top:1rem;">
+                    <button type="submit" class="cta">Browse Books</button>
+                </form>
+                <div style="margin-top:1rem; text-align:left;">
+                    <h3>Books Listed:</h3>
+                    <ul style="padding-left:1rem;">
+                        {% for book in books %}
+                        <li><strong>{{ book.title }}</strong> by {{ book.author }}</li>
+                        {% endfor %}
+                        {% if not books %}
+                        <li>No books listed yet.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <div class="feature">
+                <h2>Contact</h2>
+                <p>Connect with other users to arrange exchanges.</p>
+                <form action="/contact" method="post" style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; align-items:center;">
+                    <input type="email" name="email" placeholder="Your Email" required style="width:80%;padding:0.5rem;">
+                    <input type="text" name="message" placeholder="Message" required style="width:80%;padding:0.5rem;">
+                    <button type="submit" class="cta" style="width:80%;">Contact User</button>
+                </form>
+            </div>
+        </div>
+        <footer style="margin-top:2rem; text-align:center; color:#888;">
+            <hr>
+            <p>&copy; 2025 Book Exchange Platform. Made with ❤️ for book lovers.</p>
+        </footer>
+    </div>
+</body>
+</html>
