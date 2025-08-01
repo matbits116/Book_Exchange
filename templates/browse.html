@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Browse Books</h1>
+        <a href="/" style="margin-bottom:1rem;display:inline-block;">Back to Home</a>
+    </div>
+    <div class="container">
+        <h2>Available Books</h2>
+        <ul>
+            {% for book in books %}
+            <li>
+                <img src="{{ book.cover_url }}" alt="Cover" style="width:40px; height:60px; object-fit:cover; border-radius:4px; vertical-align:middle; margin-right:0.5rem;"/>
+                <strong>{{ book.title }}</strong> by {{ book.author }}
+                {% if book.rating_count > 0 %}
+                    - {{ book.average_rating }}★ ({{ book.rating_count }})
+                {% endif %}
+            </li>
+            {% endfor %}
+            {% if not books %}
+            <li>No books listed yet.</li>
+            {% endif %}
+        </ul>
+    </div>
+</body>
+</html>
